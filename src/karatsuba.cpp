@@ -127,6 +127,52 @@ std::string multiplicacionClasica(const std::string& A, const std::string& B) {
     return normalizar(resultado);
 }
 
+//  Multiplicacion rapida de Karatsuba recursiva (3 productos)
 std::string karatsuba(const std::string& A, const std::string& B) {
-    return "0";
+    std::string a = normalizar(A);
+    std::string b = normalizar(B);
+
+    // Si alguno de los factores es 0, el producto es 0
+    if (a == "0" || b == "0") {
+        return "0";
+    }
+
+    //  Caso base de 1 digito resuelto con multiplicacion directa
+    if (a.size() == 1 && b.size() == 1) {
+        int prod = (a[0] - '0') * (b[0] - '0');
+        return std::to_string(prod);
+    }
+
+    //  Igualar longitud a la misma potencia de 2 con ceros a la izquierda
+    igualarLongitudPotencia2(a, b);
+    int n = (int)a.size();
+    int m = n / 2;
+
+    // Separar en mitad alta y mitad baja respecto a m
+    Mitades partA = partir(a, m);
+    Mitades partB = partir(b, m);
+
+    const std::string& x1 = partA.alta;
+    const std::string& x0 = partA.baja;
+    const std::string& y1 = partB.alta;
+    const std::string& y0 = partB.baja;
+
+    // Tres productos recursivos de Karatsuba:
+    // P1 = x1 * y1
+    // P2 = x0 * y0
+    // P3 = (x1 + x0) * (y1 + y0)
+    std::string P1 = karatsuba(x1, y1);
+    std::string P2 = karatsuba(x0, y0);
+    std::string P3 = karatsuba(sumar(x1, x0), sumar(y1, y0));
+
+    //  Orden de resta para evitar negativos intermedios -> (P3 - P1) - P2
+    std::string P3_menos_P1 = restar(P3, P1);
+    std::string termino_central = restar(P3_menos_P1, P2);
+
+    // Recomposicion: x * y = P1 * 10^(2m) + (P3 - P1 - P2) * 10^m + P2
+    std::string parte1 = desplazar(P1, 2 * m);
+    std::string parte2 = desplazar(termino_central, m);
+    std::string resultado = sumar(sumar(parte1, parte2), P2);
+
+    return normalizar(resultado);
 }
