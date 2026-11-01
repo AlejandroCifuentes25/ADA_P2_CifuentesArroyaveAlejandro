@@ -97,7 +97,34 @@ Mitades partir(const std::string& A, int m) {
 
 
 std::string multiplicacionClasica(const std::string& A, const std::string& B) {
-    return "0";
+   //  Multiplicacion clasica O(n^2) sobre cadenas de digitos en base 10
+    std::string a = normalizar(A);
+    std::string b = normalizar(B);
+
+    if (a == "0" || b == "0") {
+        return "0";
+    }
+
+    size_t n = a.size();
+    size_t m = b.size();
+    // El producto de n digitos por m digitos tiene a lo sumo n + m digitos
+    std::string resultado(n + m, '0');
+
+    // Multiplicamos cada digito de 'a' por cada digito de 'b' de derecha a izquierda
+    for (int i = (int)n - 1; i >= 0; --i) {
+        int carry = 0;
+        int d1 = a[i] - '0';
+
+        for (int j = (int)m - 1; j >= 0; --j) {
+            int d2 = b[j] - '0';
+            int suma = (resultado[i + j + 1] - '0') + (d1 * d2) + carry;
+            resultado[i + j + 1] = '0' + (suma % 10);
+            carry = suma / 10;
+        }
+        resultado[i] += carry;
+    }
+
+    return normalizar(resultado);
 }
 
 std::string karatsuba(const std::string& A, const std::string& B) {
